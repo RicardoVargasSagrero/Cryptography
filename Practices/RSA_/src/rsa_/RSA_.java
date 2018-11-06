@@ -28,7 +28,10 @@ import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import javax.crypto.Cipher;
-
+import java.io.*;
+import java.nio.*;
+import java.security.*;
+import java.security.spec.*;
 /**
  *
  * @author rsagr
@@ -45,14 +48,18 @@ public class RSA_ {
         // TODO code application logic here
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         //KeyPair keyPair = buildKeyPair();
-        kpg.initialize(1024);
+        kpg.initialize(2048);
         KeyPair kp = kpg.genKeyPair();
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
         System.out.println("Public key: "+publicKey.toString()+"\nlength public: "+publicKey.toString().length()+"\nPrivate key: "+privateKey.toString()+"\n lenght of private = "+privateKey.toString().length());
         
-        //PublicKey pubkey = keyPair.getPublic();
-        //PrivateKey privateKey = keyPair.getPrivate();
+        //We have the private and public key, now we'll use the methods
+        byte str [] = encrypt(privateKey,"Hola mundo");
+        byte strD [] = decrypt(publicKey,str);
+        
+        System.out.println(new String(str));
+        System.out.println(new String(strD));
         /***
          * Saving the public and private key in a File
          */
@@ -60,28 +67,17 @@ public class RSA_ {
         RSAPublicKeySpec pub = fact.getKeySpec(kp.getPublic(), RSAPublicKeySpec.class);
         RSAPrivateKeySpec priv = fact.getKeySpec(kp.getPrivate(), RSAPrivateKeySpec.class);
         
-        createFile("public_RSV.key",pub.getModulus(),pub.getPublicExponent());
+        createFile("public_RVS.key",pub.getModulus(),pub.getPublicExponent());
         createFile("private_RVS.key",priv.getModulus(),priv.getPrivateExponent());
+ 
+        PublicKey puk = getPublic("public_RVS.key");
+        PrivateKey prk = getPrivate("private_RVS.key");
         
-        File publicFile = new File("public_RSV.key");
-        File privateFile = new File("private_RVS.key");
+        byte stra[] = encrypt(prk,"Hola mundo");
+        byte straa[] = decrypt(puk,stra);
         
-        //Decode Public key 
-        byte [] keyBytes = Files.readAllBytes(Paths.get(publicFile.getName()));
-   
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(keyBytes);
-        
-        RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(pubSpec);
-         
-        // decode private key
-        byte [] pkeyBytes = Files.readAllBytes(Paths.get(privateFile.getName()));
-        
-        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(pkeyBytes);
-        RSAPrivateKey privKey = (RSAPrivateKey) kf.generatePrivate(privSpec);
-        /***
-         * 
-         */
+        System.out.println(new String(stra));
+        System.out.println(new String(straa));
         
         /**
          *We start the encryption and decryption methods 
@@ -117,5 +113,16 @@ public class RSA_ {
         
         return cipher.doFinal(encrypted);
     }
-    
+    public static PrivateKey getPrivate(String filename) throws Exception{
+        byte [] keyBytes = Files.readAllBytes(Paths.get(filename));
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePrivate(spec);
+    }
+    public static PublicKey getPublic(String filename) throws Exception{
+        byte[] keyBytes = Files.readAllBytes(Paths.get(filename));
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePublic(spec);
+    }
 }
