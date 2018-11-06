@@ -89,6 +89,18 @@ public class RSA_ {
         byte [] verified = decrypt(publicKey,signed);
         System.out.println(new String(verified));
     }
+    public static void createFilePEM(String filename, BigInteger mod,BigInteger exp) throws IOException{
+        ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));
+        PemWriter pemWriter = new PemWriter(new OutputStreamWriter(new FileOutputStream(filename)));
+        try{
+            out.writeObject(mod);
+            out.writeObject(exp);
+        }catch(Exception e){
+            e.printStackTrace();
+        }finally{
+            out.close();
+        }
+    }
     public static void createFile(String filename, BigInteger mod,BigInteger exp) throws IOException{
         ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));
         try{
