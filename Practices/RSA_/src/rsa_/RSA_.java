@@ -62,29 +62,21 @@ public class RSA_ {
     static PublicKey finalPublicKey;
     static PrivateKey finalPrivateKey;
     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, Exception {
-        // TODO code application logic here
-        finalPublicKey = getPemPublicKey("public_rvargass.pem","RSA");
-        System.out.println("public key created");
-        Security.addProvider(new BouncyCastleProvider());
-        KeyFactory factory = KeyFactory.getInstance("RSA", "BC");
-        try{
-            KeyPair loadedKeyPair = LoadKeyPair("","RSA"); 
-            finalPublicKey = loadedKeyPair.getPublic();
-            finalPrivateKey = loadedKeyPair.getPrivate();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
         
-        byte finalstr [] = encrypt(finalPrivateKey,"Hola mundo por ultima vez");
-        byte finalstrD [] = decrypt(finalPublicKey,finalstr);
-        System.out.println(new String(finalstr));
-        System.out.println(new String(finalstrD));
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         //KeyPair keyPair = buildKeyPair();
         kpg.initialize(2048);
         KeyPair kp = kpg.genKeyPair();
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
+        SaveFiles(publicKey,privateKey);
+        System.out.println("Key are saved in a file");
+        finalPublicKey = getPublic("Ricardo_Vargas_Public.pem");
+        finalPrivateKey = getPrivate("Ricardo_Vargas_Private.pem");
+        byte strss [] = encrypt(privateKey,"Hola mundo de la parka");
+        byte strDss [] = decrypt(publicKey,strss);
+        System.out.println(new String(strss));
+        System.out.println(new String(strDss));
         System.out.println("Public key: "+publicKey.toString()+"\nlength public: "+publicKey.toString().length()+"\nPrivate key: "+privateKey.toString()+"\n lenght of private = "+privateKey.toString().length());
         
         //We have the private and public key, now we'll use the methods
@@ -139,9 +131,25 @@ public class RSA_ {
         byte [] verified = decrypt(publicKey,signed);
         System.out.println(new String(verified));
     }
+    public static void SaveFiles(PublicKey publicKey, PrivateKey privateKey) throws FileNotFoundException, IOException{
+        // Store Public Key
+        final File publicKeyFile = new File("Ricardo_Vargas_Public.pem");
+        //publicKeyFile.getParentFile().mkdirs(); // make directories if they do not exist
+        final X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey.getEncoded());
+        try (FileOutputStream fos = new FileOutputStream(publicKeyFile)) {
+            fos.write(x509EncodedKeySpec.getEncoded());
+        }
 
-    public static KeyPair LoadKeyPair(String path, String algorithm) throws IOException, NoSuchAlgorithmException,
-			InvalidKeySpecException {
+        // Store Private Key.
+        final File privateKeyFile = new File("Ricardo_Vargas_Private.pem");
+        //privateKeyFile.getParentFile().mkdirs(); // make directories if they do not exist
+        final PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
+        try (FileOutputStream fos = new FileOutputStream(privateKeyFile)) {
+            fos.write(pkcs8EncodedKeySpec.getEncoded());
+        }
+    }
+
+    public static KeyPair LoadKeyPair(String path, String algorithm) throws IOException, NoSuchAlgorithmException,InvalidKeySpecException {
 		// Read Public Key.
 		File filePublicKey = new File(path + "C:\\Users\\rsagr\\Desktop\\7mo\\Cryptography\\Practicas\\RSA_\\public_rvargass.pem");
 		FileInputStream fis = new FileInputStream(path + "C:\\Users\\rsagr\\Desktop\\7mo\\Cryptography\\Practicas\\RSA_\\public_rvargass.pem");
