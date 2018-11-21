@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
@@ -132,7 +133,8 @@ public class messageBuilder {
     public String getKeyValue(){
         return keyAes;
     }
-    public String getFileInfo(){
-        
+    public String getFileInfo(String path)throws IOException{
+        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        return new String(encoded,StandardCharsets.UTF_8);
     }
 }

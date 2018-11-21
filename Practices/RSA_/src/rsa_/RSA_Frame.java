@@ -270,12 +270,18 @@ public class RSA_Frame extends javax.swing.JFrame {
         if(message.getAction() == "encrypt"){
             try {
                 String messageID = message.getHashID(fileText);
-               JPrivateKey =  getPrivate(message.getFileKeyName());
-                String firmaDigital = new String(encrypt(JPrivateKey,message));
+                System.out.println("message ID = "+messageID+"\nlenght of messageID = "+messageID.length());
+                JPrivateKey =  getPrivate(message.getFileKeyName());
+                byte [] DS = encrypt(JPrivateKey,messageID);
+                String firmaDigital = new String(DS);
+                System.out.println("Digital Signature of file = "+firmaDigital);
+                
             } catch (Exception ex) {
                 Logger.getLogger(RSA_Frame.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+        }
+        else if(message.getAction() == "decrypt"){
+
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -358,8 +364,8 @@ public class RSA_Frame extends javax.swing.JFrame {
         KeyPair kp = kpg.genKeyPair();
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
-        finalPublicKey = publicKey;
-        finalPrivateKey = privateKey;
+        JPublicKey = publicKey;
+        JPrivateKey = privateKey;
         SaveFiles(publicKey,privateKey);
     }
     public static void SaveFiles(PublicKey publicKey, PrivateKey privateKey) throws FileNotFoundException, IOException{
