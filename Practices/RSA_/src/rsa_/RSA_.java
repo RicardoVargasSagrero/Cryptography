@@ -62,7 +62,6 @@ public class RSA_ {
     static PublicKey finalPublicKey;
     static PrivateKey finalPrivateKey;
     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, Exception {
-        
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         //KeyPair keyPair = buildKeyPair();
         kpg.initialize(2048);

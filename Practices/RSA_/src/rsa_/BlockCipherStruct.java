@@ -76,28 +76,7 @@ public class BlockCipherStruct {
     public void SelectedMode(){
         //Select a mode of operation
         if(index == 1){
-            skfS = "DES";
-            switch(indexA){
-                case 1:
-                    modeSelected = modes[0];
-                    nameAux = "DES_ECB";
-                    break;
-                case 2:
-                    modeSelected = modes[1];
-                    nameAux = "DES_CBC";
-                    break;
-                case 3:
-                    modeSelected = modes[2];
-                    nameAux = "DES_CFB";
-                    break;
-                case 4:
-                    modeSelected = modes[3];
-                    nameAux = "DES_OFB";
-                    break;
-                default:
-                    modeSelected = modes[4];
-                    nameAux = "DES_CTR";
-            }
+            
         }
         else{
             skfS = "AES";
@@ -129,49 +108,12 @@ public class BlockCipherStruct {
     }
     private void FileOutName(){
         if(command.contains("-c")){
-            nameOutFile = "E"+nameAux+".bmp"; 
+            nameOutFile = "E_"+ff.getName(); 
         }
         else if(command.contains("-d")){
-            nameOutFile = "D"+nameAux+".bmp";
+            nameOutFile = "D_"+ff.getName();
         }
         System.out.println("Name of the new file: "+nameOutFile);
-    }
-    private byte[] getHeader(byte[] contented){
-        byte [] cab = new byte[54];
-        int i;
-        for(i = 0; i < 54; i++){
-            cab[i] = contented[i];
-        }
-        return cab;
-    }
-    private byte[] clrHeader(byte[] clr){
-        byte [] aux = new byte[clr.length-54];
-        int i;
-        for(i = 0; i < clr.length-54; i++){
-            aux[i] = clr[i+54];
-        }
-        return aux;
-    }
-    private void createImage(byte[] c){
-        try{
-            Files.write(newff.toPath(),c);
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-    }
-    private String strConcat(byte [] fS){
-        //From here we use the cipher to encrypt or decrypt finalString, after doing that we need to contatened the header with the result
-        //using arraycopyFuntion
-        //funtion to print all the bytes from an array 
-        //byte[] byteArray = new byte[] { -1, -128, 1, 127 };
-        //System.out.println(Arrays.toString(byteArray));
-        byte[] contated = new byte[54+fS.length];
-        arraycopy(header,0,contated,0,header.length);
-        arraycopy(fS,0,contated,54,fS.length);
-        System.out.println(Arrays.toString(contated));
-        newff = new File(nameOutFile);
-        createImage(contated);
-        return finalStringCont;
     }
     private byte[] Action(byte[] fString) throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException{
         /***
@@ -232,27 +174,19 @@ public class BlockCipherStruct {
         SelectedMode();
         FileOutName();
         byte[] finalString = Files.readAllBytes(ff.toPath());
-        header = getHeader(finalString);
-        //System.out.println(Arrays.toString(header));
-        //System.out.println(Arrays.toString(finalString));
-        finalString = clrHeader(finalString);
-        
+        System.out.println("Nombre del archivo abierto\n"+ff.getName());
         /*Encrypt and decrypt funtion*/
         byte[] encryptedString;
         encryptedString = Action(finalString);
         System.out.println("final concat");
         System.out.println(Arrays.toString(encryptedString));
-        finalStringCont = strConcat(encryptedString);
-        
+        finalStringCont = new String(encryptedString,"UTF-8");
+        System.out.println("Con UTF-8\n"+finalStringCont);
+        finalStringCont = new String(encryptedString,"UTF-16");
+        System.out.println("Con UTF-16\n"+finalStringCont);
+        finalStringCont = new String(encryptedString);
+        System.out.println("Sin nada\n"+finalStringCont);
+        File finalFile = new File(nameOutFile);
+        Files.write(finalFile.toPath(),encryptedString);
     }
-    public BufferedImage getNewImage(File ff){
-        BufferedImage image = null;
-        try{
-            image = ImageIO.read(new File(ff.getPath()));
-        }catch(IOException e){
-            JOptionPane.showMessageDialog(null,"Error opening the file: "+e);
-        }
-        return image;
-    }
-    
 }

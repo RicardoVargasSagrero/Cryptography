@@ -5,10 +5,13 @@
  */
 package rsa_;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
@@ -261,27 +264,49 @@ public class RSA_Frame extends javax.swing.JFrame {
         // TODO add your handling code here:
         //Button Group 1 
         jRadioButton1.setActionCommand("encrypt");
-        jRadioButton2.setActionCommand("decrytp");
+        jRadioButton2.setActionCommand("decrypt");
         String key = textField1.getText();
         //Here we create the objtect with 
         messageBuilder message = new messageBuilder(fileText,fileKey,buttonGroup1.getSelection().getActionCommand(),key);
+        
         System.out.println("Message values\n File Text = "+message.getFileName()+"\nFile key = "+message.getFileKeyName());
         System.out.println("Action  = "+message.getAction()+"\nKey = "+message.getKeyValue());
         if(message.getAction() == "encrypt"){
             try {
+                BlockCipherStruct blockCipher = new BlockCipherStruct(0,5,fileText,key,"-c");
+                blockCipher.cipherAction();
                 String messageID = message.getHashID(fileText);
                 System.out.println("message ID = "+messageID+"\nlenght of messageID = "+messageID.length());
                 JPrivateKey =  getPrivate(message.getFileKeyName());
                 byte [] DS = encrypt(JPrivateKey,messageID);
                 String firmaDigital = new String(DS);
                 System.out.println("Digital Signature of file = "+firmaDigital);
-                
+                System.out.println("E_"+fileText.getName());
+                //makeFileOutput("E_"+fileText.getName(),firmaDigital);
             } catch (Exception ex) {
                 Logger.getLogger(RSA_Frame.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         else if(message.getAction() == "decrypt"){
-
+            try{
+                JPublicKey = getPublic(message.getFileKeyName());
+                byte[] fileTextAES = Files.readAllBytes(fileText.toPath());
+                String fileContented = new String(fileTextAES);
+                /*String [] parts = fileContented.split(separator);
+                String cipher = parts[0];
+                System.out.println("cipher separator\n"+cipher);
+                String digitalSignature = parts[1];
+                System.out.println("Digital signature\n"+digitalSignature);*/
+                fileNameOut = new String("Cipher_"+fileText.getName());
+                PrintStream out = new PrintStream(new FileOutputStream(fileNameOut));
+                out.print(fileContented);
+                File fileOut = new File(fileNameOut);
+                //FOR THE LAST VERSION WE NEED TO ENCRYPT AND DECRYPT THE KEY OF THE AES
+                BlockCipherStruct blockCipher = new BlockCipherStruct(0,5,fileOut,key,"-d");
+                blockCipher.cipherAction();
+            }catch(Exception ex){
+                Logger.getLogger(RSA_Frame.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -324,6 +349,8 @@ public class RSA_Frame extends javax.swing.JFrame {
     public static File fileKey;
     private static PublicKey JPublicKey;
     private static PrivateKey JPrivateKey;
+    private static String separator = "#####";
+    private static String fileNameOut;
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -408,6 +435,14 @@ public class RSA_Frame extends javax.swing.JFrame {
         X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePublic(spec);
+    }
+    public static void makeFileOutput(String filename,String digitalSignature)throws IOException{
+        BufferedWriter bw = null;
+        bw = new BufferedWriter(new FileWriter(filename,true));
+        bw.write(separator+digitalSignature);
+        bw.newLine();
+        bw.flush();
+        bw.close();
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
