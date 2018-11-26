@@ -62,6 +62,12 @@ public class RSA_ {
     static PublicKey finalPublicKey;
     static PrivateKey finalPrivateKey;
     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, Exception {
+        File f = new File("spaceship.bmp");
+        BlockCipherStruct blockC = new BlockCipherStruct(0,5,f,"zapatitozapatito","-c");
+        blockC.cipherAction();
+        File ff = new File("E_spaceship.bmp");
+        blockC = new BlockCipherStruct(0,5,ff,"zapatitozapatito","-d");
+        blockC.cipherAction();
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         //KeyPair keyPair = buildKeyPair();
         kpg.initialize(2048);

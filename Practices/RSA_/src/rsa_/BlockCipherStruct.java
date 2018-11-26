@@ -161,11 +161,13 @@ public class BlockCipherStruct {
             if(command.contains("-c")){
                 ci.init(Cipher.ENCRYPT_MODE,skey,ivspec);
                 encryptedString = ci.doFinal(fString);
+                System.out.println(new String(encryptedString));
                 return encryptedString;
             }
             else{
                 ci.init(Cipher.DECRYPT_MODE,skey,ivspec);
                 encryptedString = ci.doFinal(fString);
+                System.out.println(new String(encryptedString));
                 return encryptedString;
             }
         }
@@ -180,12 +182,7 @@ public class BlockCipherStruct {
         encryptedString = Action(finalString);
         System.out.println("final concat");
         System.out.println(Arrays.toString(encryptedString));
-        finalStringCont = new String(encryptedString,"UTF-8");
-        System.out.println("Con UTF-8\n"+finalStringCont);
-        finalStringCont = new String(encryptedString,"UTF-16");
-        System.out.println("Con UTF-16\n"+finalStringCont);
-        finalStringCont = new String(encryptedString);
-        System.out.println("Sin nada\n"+finalStringCont);
+        System.out.println(new String (encryptedString));
         File finalFile = new File(nameOutFile);
         Files.write(finalFile.toPath(),encryptedString);
     }

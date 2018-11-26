@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
@@ -268,21 +269,23 @@ public class RSA_Frame extends javax.swing.JFrame {
         String key = textField1.getText();
         //Here we create the objtect with 
         messageBuilder message = new messageBuilder(fileText,fileKey,buttonGroup1.getSelection().getActionCommand(),key);
-        
-        System.out.println("Message values\n File Text = "+message.getFileName()+"\nFile key = "+message.getFileKeyName());
-        System.out.println("Action  = "+message.getAction()+"\nKey = "+message.getKeyValue());
+
         if(message.getAction() == "encrypt"){
             try {
                 BlockCipherStruct blockCipher = new BlockCipherStruct(0,5,fileText,key,"-c");
                 blockCipher.cipherAction();
+                
                 String messageID = message.getHashID(fileText);
-                System.out.println("message ID = "+messageID+"\nlenght of messageID = "+messageID.length());
+                System.out.println("message ID = "+messageID);
                 JPrivateKey =  getPrivate(message.getFileKeyName());
+                
                 byte [] DS = encrypt(JPrivateKey,messageID);
                 String firmaDigital = new String(DS);
-                System.out.println("Digital Signature of file = "+firmaDigital);
-                System.out.println("E_"+fileText.getName());
-                //makeFileOutput("E_"+fileText.getName(),firmaDigital);
+                System.out.println("firma antes\n"+firmaDigital);
+                FileWriter fw = new FileWriter("E_"+fileText.getName(),true);
+                fw.write(separator+firmaDigital);
+                fw.close();
+                
             } catch (Exception ex) {
                 Logger.getLogger(RSA_Frame.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -292,18 +295,29 @@ public class RSA_Frame extends javax.swing.JFrame {
                 JPublicKey = getPublic(message.getFileKeyName());
                 byte[] fileTextAES = Files.readAllBytes(fileText.toPath());
                 String fileContented = new String(fileTextAES);
+                String [] parts = fileContented.split(separator);
+                File cipherPart = new File("Cipher_"+fileText.getName());
+                //String cipher = parts[0];
+                System.out.println("Parte quitada\n"+parts[0]);
+                File signature = new File("signature.txt");
+                FileWriter fw = new FileWriter(cipherPart);
+                fw.write(parts[0]);
+                fw.flush();
+                fw = new FileWriter(signature);
+                fw.write(parts[1]);
+                fw.close();
+                BlockCipherStruct blockCipher = new BlockCipherStruct(0,5,cipherPart,key,"-d");
+                blockCipher.cipherAction();
+                cipherPart.delete();
+                System.out.println(signature.length()+"\n"+parts[1].length()+"\n"+parts[1].getBytes().length);
+                byte [] sig = decrypt(JPublicKey,parts[1].getBytes());
+                System.out.println(new String(sig));
+                signature.delete();
                 /*String [] parts = fileContented.split(separator);
                 String cipher = parts[0];
                 System.out.println("cipher separator\n"+cipher);
                 String digitalSignature = parts[1];
                 System.out.println("Digital signature\n"+digitalSignature);*/
-                fileNameOut = new String("Cipher_"+fileText.getName());
-                PrintStream out = new PrintStream(new FileOutputStream(fileNameOut));
-                out.print(fileContented);
-                File fileOut = new File(fileNameOut);
-                //FOR THE LAST VERSION WE NEED TO ENCRYPT AND DECRYPT THE KEY OF THE AES
-                BlockCipherStruct blockCipher = new BlockCipherStruct(0,5,fileOut,key,"-d");
-                blockCipher.cipherAction();
             }catch(Exception ex){
                 Logger.getLogger(RSA_Frame.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -349,7 +363,7 @@ public class RSA_Frame extends javax.swing.JFrame {
     public static File fileKey;
     private static PublicKey JPublicKey;
     private static PrivateKey JPrivateKey;
-    private static String separator = "#####";
+    private static String separator = "\n#####\n";
     private static String fileNameOut;
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
