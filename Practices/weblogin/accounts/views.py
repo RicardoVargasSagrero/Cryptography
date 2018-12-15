@@ -10,7 +10,7 @@ from accounts.forms import (
 # Create your views here.
 def home(request):
 	numbers = [1,2,3,4,5]
-	name = 'Alonso Carrillo'
+	name = 'Ricardo Vargas'
 	args = {'myName': name, 'numbers': numbers}
 
 	return render(request, 'accounts/home.html', args)
